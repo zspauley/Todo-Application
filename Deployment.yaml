@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment # Kubernetes resource kind we are creating
+metadata:
+  name: todo-app
+  labels:
+    app: todo-app
+spec:
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: todo-app
+
+  template:
+    metadata:
+      labels:
+        app: todo-app
+        tier: todo-app
+    spec:
+      containers:
+        - name: todo-app
+          image: rishabh336/todo_app:tagversion # Image that will be used to containers in the cluster
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080 # The port that the container is running on in the cluster
+              name: todo-app
+
+---
+
+apiVersion: v1 # Kubernetes API version
+kind: Service # Kubernetes resource kind we are creating
+metadata: # Metadata of the resource kind we are creating
+  name: todo-app
+  labels:
+    app: todo-app
+spec:
+  selector:
+    app: todo-app
+    tier: todo-app
+  ports:
+    - protocol: "TCP"
+      port: 80 # The port that the service is running on in the cluster
+      targetPort: 5000 # The port exposed by the service
+  type: LoadBalancer # type of the service.
