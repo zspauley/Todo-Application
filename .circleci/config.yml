@@ -13,5 +13,26 @@ jobs:
       - run:
           name: Build and push Docker image
           command: |
-            docker build -t rishabh336/todo:latest .
-            docker push rishabh336/todo:latest
+            docker build -t rishabh336/todo_app:$CIRCLE_SHA1 .
+            docker push rishabh336/todo_app:$CIRCLE_SHA1
+  deploy:
+    docker:
+      - image: google/cloud-sdk
+    steps:
+      - checkout
+      - run:
+          name: Configure gcloud
+          command: |
+            echo $GCLOUD_SERVICE_KEY > key.json
+            gcloud auth activate-service-account --key-file=key.json
+            gcloud container clusters get-credentials whizlabs-cluster --zone us-central1-a --project $GCLOUD_PROJECT_ID
+      - run:
+          name: Deploy to Kubernetes
+          command: kubectl apply -f Deployment.yaml
+workflows:
+  build-and-deploy:
+    jobs:
+      - build:
+          context: my-context
+      - deploy:
+          context: my-context
