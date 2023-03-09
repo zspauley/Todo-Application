@@ -23,7 +23,7 @@ pipeline{
             steps{
                 script{
                     withCredentials([string(credentialsId: 'Docker_Password', variable: 'docker')]){
-                    sh 'docker login -u <Docker Username> -p latest'
+                    sh 'docker login -u <Docker Username> -p ${docker}'
                     }
                     sh "docker push <Docker Username>/todo_app:latest"
                 }
