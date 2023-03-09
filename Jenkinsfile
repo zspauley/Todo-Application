@@ -15,7 +15,7 @@ pipeline{
         stage('Building Docker file'){
             steps {
                 script{
-                    sh "docker build -t <Docker Username>/todo_app:${env.BUILD_ID} ."
+                    sh "docker build -t <Docker Username>/todo_app:latest ."
                 }
             }
         }
@@ -23,15 +23,15 @@ pipeline{
             steps{
                 script{
                     withCredentials([string(credentialsId: 'Docker_Password', variable: 'docker')]){
-                    sh 'docker login -u <Docker Username> -p ${docker}'
+                    sh 'docker login -u <Docker Username> -p latest'
                     }
-                    sh "docker push <Docker Username>/todo_app:${env.BUILD_ID}"
+                    sh "docker push <Docker Username>/todo_app:latest"
                 }
             }
         }
         stage('Deploy to Kubernetes'){
             steps{
-                sh "sed -i 's/tagversion/${env.BUILD_ID}/g' Deployment.yaml"
+                sh "sed -i 's/tagversion/latest/g' Deployment.yaml"
                 step([$class: 'KubernetesEngineBuilder', projectId: env.PROJECT_ID, clusterName: env.CLUSTER_NAME, location: env.LOCATION, manifestPattern: 'Deployment.yaml', credentialsId: env.CREDENTIALS_ID, verifyDeployments: true])   
                 }
             }
